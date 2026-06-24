@@ -72,21 +72,27 @@ public class EmployeeServiceImpl implements EmployeeServices {
 
         Department department = departmentRepo.findById(employee.departmentId()).orElseThrow(() -> CustomeExceptionHandler.
                 ResourseNotFound("Department with id " + employee.departmentId() + " not found"));
-        String token = UUID.randomUUID().toString();
-        Employee newEmployee = new Employee();
-        newEmployee.setEmployeeCreationToken(token);
-        newEmployee.setFirstName(employee.firstName());
-        newEmployee.setLastName(employee.lastName());
-        newEmployee.setEmail(employee.email());
-        newEmployee.setPhoneNumber(employee.phoneNumber());
-        newEmployee.setHireDate(employee.hireDate());
-        newEmployee.setPosition(employee.position());
-        newEmployee.setDepartment(department);
-        employeeRepo.save(newEmployee);
+        try {
 
-        emailService.sendEmail(newEmployee.getEmail(), token);
 
-        return newEmployee;
-//        return newEmployee;
+            String token = UUID.randomUUID().toString();
+            Employee newEmployee = new Employee();
+            newEmployee.setEmployeeCreationToken(token);
+            newEmployee.setFirstName(employee.firstName());
+            newEmployee.setLastName(employee.lastName());
+            newEmployee.setEmail(employee.email());
+            newEmployee.setPhoneNumber(employee.phoneNumber());
+            newEmployee.setHireDate(employee.hireDate());
+            newEmployee.setPosition(employee.position());
+            newEmployee.setDepartment(department);
+            employeeRepo.save(newEmployee);
+
+            emailService.sendEmail(newEmployee.getEmail(), token);
+
+            return newEmployee;
+
+        } catch (Exception e) {
+            throw CustomeExceptionHandler.ResourseNotFound("something is invalid");
+        }
     }
 }

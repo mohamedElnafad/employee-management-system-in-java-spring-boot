@@ -27,7 +27,7 @@ public class Employee {
     private String firstName;
 
     @Column(name = "is_verified", columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean isVerified;
+    private Boolean isVerified = false;
 
     @Column(name = "employee_creation_token", nullable = false)
     private String employeeCreationToken;

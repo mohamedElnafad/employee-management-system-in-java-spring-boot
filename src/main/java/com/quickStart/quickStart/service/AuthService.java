@@ -5,6 +5,7 @@ import com.quickStart.quickStart.DTOs.LoginResponse;
 import com.quickStart.quickStart.DTOs.SignupRequest;
 import com.quickStart.quickStart.entities.Employee;
 import com.quickStart.quickStart.entities.UserAccount;
+import com.quickStart.quickStart.exceptions.CustomeExceptionHandler;
 import com.quickStart.quickStart.jwtSecurity.JwtService;
 import com.quickStart.quickStart.repositories.EmployeeRepo;
 import com.quickStart.quickStart.repositories.UserAccountRepo;
@@ -38,20 +39,27 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-    public UserAccount signup(SignupRequest request) {
+    public void signup(SignupRequest request, String token) {
         if (userAccountRepo.existsByUsername(request.username())) {
             throw new IllegalArgumentException("Username '" + request.username() + "' is already taken.");
         }
 
-        Employee employee = employeeRepo.findById(request.employeeId())
-                .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + request.employeeId()));
+        Employee employee = employeeRepo.findByemployeeCreationToken(token);
+
+        if (Boolean.TRUE.equals(employee.getIsVerified())) {
+            throw CustomeExceptionHandler.BadRequest("Invalid employee creation token.");
+        }
+
 
         UserAccount account = new UserAccount();
         account.setUsername(request.username());
         account.setPassword(passwordEncoder.encode(request.password()));
         account.setEmployee(employee);
 
-        return userAccountRepo.save(account);
+        userAccountRepo.save(account);
+        employee.setIsVerified(true);
+        employee.setEmployeeCreationToken(null);
+        employeeRepo.save(employee);
     }
 
     public LoginResponse login(LoginRequest request) {

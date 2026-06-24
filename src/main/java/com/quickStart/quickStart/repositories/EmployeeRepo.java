@@ -9,4 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface EmployeeRepo extends JpaRepository<Employee, UUID> {
+    public Employee findByemployeeCreationToken(String token);
 }

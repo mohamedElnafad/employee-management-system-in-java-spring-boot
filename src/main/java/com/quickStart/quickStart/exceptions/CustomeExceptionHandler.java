@@ -12,6 +12,10 @@ public class CustomeExceptionHandler extends RuntimeException {
 
     // static -> don't create new instance every time, just call the method directly
     public static CustomeExceptionHandler ResourseNotFound(String message) {
+        return new CustomeExceptionHandler(401, message);
+    }
+
+    public static CustomeExceptionHandler BadRequest(String message) {
         return new CustomeExceptionHandler(400, message);
     }
 }
