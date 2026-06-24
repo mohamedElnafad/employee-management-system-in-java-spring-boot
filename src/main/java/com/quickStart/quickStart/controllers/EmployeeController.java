@@ -1,17 +1,18 @@
 package com.quickStart.quickStart.controllers;
 
 import com.quickStart.quickStart.DTOs.CreateEmployee;
+import com.quickStart.quickStart.DTOs.PaginationResponse;
 import com.quickStart.quickStart.DTOs.UpdateEmployee;
 import com.quickStart.quickStart.abstracts.EmployeeServices;
 import com.quickStart.quickStart.entities.Employee;
 import com.quickStart.quickStart.exceptions.GlobalResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,11 +25,26 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
-    @GetMapping()
-    public ResponseEntity<GlobalResponse<List<Employee>>> getEmployees() {
-        List<Employee> allEmployees = employeeService.getEmployees();
 
-        return new ResponseEntity<>(new GlobalResponse<>(allEmployees), HttpStatus.OK);
+    @GetMapping()
+    public ResponseEntity<GlobalResponse<PaginationResponse<Employee>>> getEmployees(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "2") int size) {
+        Page<Employee> allEmployees = employeeService.getEmployees(page, size);
+        String nextPageURL = allEmployees.hasNext() ? "/employees?page=" +
+                                                      (page + 1) + "&size=" + size : null;
+        String previosPageURL = allEmployees.hasPrevious() ? "/employees?page=" + (page - 1) + "&size=" + size : null;
+
+        var paginationResponse = new PaginationResponse<>(allEmployees.getContent(),
+                allEmployees.getNumber(),
+                allEmployees.getTotalPages(),
+                allEmployees.getSize(),
+                allEmployees.getTotalElements(),
+                allEmployees.hasNext(),
+                allEmployees.hasPrevious(),
+                nextPageURL,
+                previosPageURL
+        );
+
+        return new ResponseEntity<>(new GlobalResponse<>(paginationResponse), HttpStatus.OK);
     }
 
     @GetMapping("/{employeeId}")
